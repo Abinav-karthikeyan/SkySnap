@@ -1,4 +1,5 @@
 version: "3.8"
+
 services:
   db:
     image: postgis/postgis:15-3.3
@@ -7,11 +8,11 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: flights
     volumes:
-      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
 
-  ingest:
+  ingest_london:
     build: ./ingest
     depends_on:
       - db
@@ -20,3 +21,71 @@ services:
       - DB_NAME=flights
       - DB_USER=postgres
       - DB_PASS=postgres
+      - REGION=London
+      - LAMIN=51.28
+      - LAMAX=51.686
+      - LOMIN=-0.489
+      - LOMAX=0.236
+
+  ingest_scotland:
+    build: ./ingest
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=flights
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - REGION=Scotland
+      - LAMIN=55.0
+      - LAMAX=58.0
+      - LOMIN=-5.0
+      - LOMAX=-3.0
+
+  ingest_barcelona:
+    build: ./ingest
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=flights
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - REGION=Barcelona
+      - LAMIN=41.3
+      - LAMAX=41.5
+      - LOMIN=2.0
+      - LOMAX=2.3
+
+  ingest_munich:
+    build: ./ingest
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=flights
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - REGION=Munich
+      - LAMIN=48.0
+      - LAMAX=48.3
+      - LOMIN=11.3
+      - LOMAX=11.8
+
+  ingest_paris:
+    build: ./ingest
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=flights
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - REGION=Paris
+      - LAMIN=48.8
+      - LAMAX=49.0
+      - LOMIN=2.3
+      - LOMAX=2.5
+
+volumes:
+  pgdata:

@@ -4,6 +4,17 @@ import requests
 import psycopg2
 from psycopg2 import OperationalError, sql
 
+
+def get_bounds():
+    return {
+        'lamin': float(os.getenv("LAMIN")),
+        'lamax': float(os.getenv("LAMAX")),
+        'lomin': float(os.getenv("LOMIN")),
+        'lomax': float(os.getenv("LOMAX"))
+    }
+
+
+
 def connect_db(retries=5, delay=3):
     for attempt in range(retries):
         try:
@@ -36,9 +47,22 @@ def check_table_exists(conn, table_name="flight_snapshot"):
         return exists
 
 def fetch_and_store(conn):
-    lamin, lomin, lamax, lomax = 45.8389, 5.9962, 47.8229, 10.5226
-
-    bounds = {'lamin': lamin, 'lamax': lamax, 'lomin': lomin, 'lomax': lomax}
+    
+    # bounds = get_bounds()
+    
+    lamin,lomin,lamax,lomax = (45.8389, 5.9962,46.8371, 10.5526)
+    
+    bounds = {
+        'lamin': lamin,
+        'lamax': lamax,
+        'lomin': lomin,
+        'lomax': lomax
+    }
+    
+    
+    
+    region = os.getenv("REGION", "global")
+    
     r = requests.get("https://opensky-network.org/api/states/all", params=bounds)
     data = r.json()
     states = data.get("states", [])
@@ -57,14 +81,14 @@ def fetch_and_store(conn):
     INSERT INTO flight_snapshot (
         icao24, callsign, origin_country, time_position,
         latitude, longitude, altitude, velocity, true_track, vertical_rate,
-        geo_altitude, on_ground
-    ) VALUES (%s, %s, %s, to_timestamp(%s), %s, %s, %s, %s, %s, %s, %s, %s)
+        geo_altitude, on_ground, region
+    ) VALUES (%s, %s, %s, to_timestamp(%s), %s, %s, %s, %s, %s, %s, %s, %s, %s)
 """, (
-    s[0], s[1], s[2], s[3], s[6], s[5], s[7], s[9], s[10], s[11], s[13], s[8]
+    s[0], s[1], s[2], s[3], s[6], s[5], s[7], s[9], s[10], s[11], s[13], s[8], region
 ))
 
     conn.commit()
-    print(f"Inserted {len(states)} flight records")
+    print(f"{region} inserted {len(states)} flight records")
 
 if __name__ == "__main__":
     conn = connect_db()

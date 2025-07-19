@@ -1,6 +1,6 @@
 CREATE EXTENSION IF NOT EXISTS postgis;
 
-CREATE TABLE IF NOT EXISTS flight_snapshot (
+CREATE TABLE IF NOT EXISTS flight_snapshot ((
     id SERIAL PRIMARY KEY,
     icao24 TEXT,
     callsign TEXT,
@@ -13,5 +13,7 @@ CREATE TABLE IF NOT EXISTS flight_snapshot (
     true_track DOUBLE PRECISION,
     vertical_rate DOUBLE PRECISION,
     geo_altitude DOUBLE PRECISION,
-    on_ground BOOLEAN
+    on_ground BOOLEAN,
+    region TEXT NOT NULL
+) stored 
 );
